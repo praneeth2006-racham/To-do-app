@@ -1,52 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>To-Do App - V1</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f5fa;
-      padding: 40px;
-    }
-    main {
-      max-width: 500px;
-      margin: auto;
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-    }
-    input, button {
-      padding: 10px;
-      margin: 5px 0;
-    }
-    li { margin: 12px 0; }
-  </style>
+    <title>To-Do App V2</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f2f2f2;
+            padding: 30px;
+        }
+        main {
+            background: white;
+            padding: 20px;
+            max-width: 500px;
+            margin: auto;
+            border-radius: 10px;
+        }
+        button, input { padding: 10px; }
+        li { margin: 15px 0; }
+        .done {
+            text-decoration: line-through;
+            color: gray;
+        }
+    </style>
 </head>
 <body>
-  <main>
-    <h1>My To-Do App - V1</h1>
-    <input id="task" placeholder="Enter a task">
-    <button onclick="addTask()">Add Task</button>
-    <ul id="tasks"></ul>
-  </main>
+    <main>
+        <h1>My To-Do App - V2</h1>
 
-  <script>
-    function addTask() {
-      const input = document.getElementById("task");
-      const value = input.value.trim();
+        <input id="task" placeholder="Enter a task">
+        <button onclick="addTask()">Add Task</button>
 
-      if (!value) {
-        alert("Please enter a task");
-        return;
-      }
+        <ul id="tasks"></ul>
+    </main>
 
-      const li = document.createElement("li");
-      li.textContent = value;
-      document.getElementById("tasks").appendChild(li);
-      input.value = "";
-    }
-  </script>
+    <script>
+        function addTask() {
+            let input = document.getElementById("task");
+            let value = input.value.trim();
+
+            if (value === "") {
+                alert("Please enter a task");
+                return;
+            }
+
+            let li = document.createElement("li");
+            let text = document.createElement("span");
+            text.textContent = value;
+
+            let btn = document.createElement("button");
+            btn.textContent = "Complete";
+
+            btn.onclick = function() {
+                text.classList.toggle("done");
+                btn.textContent =
+                    text.classList.contains("done")
+                    ? "Undo" : "Complete";
+            };
+
+            li.append(text, " ", btn);
+            document.getElementById("tasks").appendChild(li);
+            input.value = "";
+        }
+    </script>
 </body>
 </html>
