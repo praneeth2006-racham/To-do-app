@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>To-Do App - V1</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f5fa;
+      padding: 40px;
+    }
+    main {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px 0;
+    }
+    li { margin: 12px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>My To-Do App - V1</h1>
+    <input id="task" placeholder="Enter a task">
+    <button onclick="addTask()">Add Task</button>
+    <ul id="tasks"></ul>
+  </main>
+
+  <script>
+    function addTask() {
+      const input = document.getElementById("task");
+      const value = input.value.trim();
+
+      if (!value) {
+        alert("Please enter a task");
+        return;
+      }
+
+      const li = document.createElement("li");
+      li.textContent = value;
+      document.getElementById("tasks").appendChild(li);
+      input.value = "";
+    }
+  </script>
+</body>
+</html>
