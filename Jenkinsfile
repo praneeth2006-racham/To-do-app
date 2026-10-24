@@ -2,14 +2,6 @@
 pipeline {
     agent any
 
-    parameters {
-        choice(
-            name: 'VERSION',
-            choices: ['v1', 'v2', 'v3'],
-            description: 'Select To-Do App version'
-        )
-    }
-
     environment {
         IMAGE_NAME = 'praneeth2006racham/todo-app'
     }
@@ -21,10 +13,25 @@ pipeline {
             }
         }
 
+        stage('Set Version') {
+            steps {
+                script {
+                    def version = env.BRANCH_NAME
+
+                    if (!(version in ['v1', 'v2', 'v3'])) {
+                        error("Invalid branch: ${version}")
+                    }
+
+                    env.APP_VERSION = version
+                    echo "Building To-Do App version: ${env.APP_VERSION}"
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 powershell '''
-                    docker build -t "$env:IMAGE_NAME`:$env:VERSION" .
+                    docker build -t "$env:IMAGE_NAME`:$env:APP_VERSION" .
 
                     if ($LASTEXITCODE -ne 0) {
                         throw "Docker build failed"
@@ -50,14 +57,14 @@ pipeline {
                             throw "DockerHub login failed"
                         }
 
-                        docker push "$env:IMAGE_NAME`:$env:VERSION"
-
-                        if ($LASTEXITCODE -ne 0) {
-                            docker logout
-                            throw "Docker push failed"
-                        }
+                        docker push "$env:IMAGE_NAME`:$env:APP_VERSION"
+                        $pushResult = $LASTEXITCODE
 
                         docker logout
+
+                        if ($pushResult -ne 0) {
+                            throw "Docker push failed"
+                        }
                     '''
                 }
             }
@@ -76,12 +83,12 @@ pipeline {
 
                         git fetch origin v3
                         if ($LASTEXITCODE -ne 0) {
-                            throw "Failed to fetch v3 branch"
+                            throw "Failed to fetch Kubernetes manifests"
                         }
 
-                        $yamlFile = "$env:TEMP\\$env:VERSION.yaml"
+                        $yamlFile = "$env:TEMP\\$env:APP_VERSION.yaml"
 
-                        git show "FETCH_HEAD:k8s/$env:VERSION.yaml" |
+                        git show "FETCH_HEAD:k8s/$env:APP_VERSION.yaml" |
                             Set-Content -Path $yamlFile
 
                         if ($LASTEXITCODE -ne 0) {
@@ -93,7 +100,8 @@ pipeline {
                             throw "Kubernetes deployment failed"
                         }
 
-                        kubectl rollout status "deployment/todo-$env:VERSION"
+                        kubectl rollout status "deployment/todo-$env:APP_VERSION"
+
                         if ($LASTEXITCODE -ne 0) {
                             throw "Kubernetes rollout failed"
                         }
@@ -109,7 +117,7 @@ pipeline {
         }
 
         failure {
-            echo 'Pipeline failed. Check the Jenkins console output.'
+            echo 'Pipeline failed. Check the Jenkins Console Output.'
         }
 
         always {
