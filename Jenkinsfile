@@ -74,14 +74,26 @@ pipeline {
                     powershell '''
                         $env:KUBECONFIG = $env:KUBECONFIG_FILE
 
-                        kubectl apply -f "k8s/$env:VERSION.yaml"
+                        git fetch origin v3
+                        if ($LASTEXITCODE -ne 0) {
+                            throw "Failed to fetch v3 branch"
+                        }
 
+                        $yamlFile = "$env:TEMP\\$env:VERSION.yaml"
+
+                        git show "FETCH_HEAD:k8s/$env:VERSION.yaml" |
+                            Set-Content -Path $yamlFile
+
+                        if ($LASTEXITCODE -ne 0) {
+                            throw "Failed to retrieve Kubernetes YAML"
+                        }
+
+                        kubectl apply -f $yamlFile
                         if ($LASTEXITCODE -ne 0) {
                             throw "Kubernetes deployment failed"
                         }
 
                         kubectl rollout status "deployment/todo-$env:VERSION"
-
                         if ($LASTEXITCODE -ne 0) {
                             throw "Kubernetes rollout failed"
                         }
