@@ -1,0 +1,32 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-v2
+  template:
+    metadata:
+      labels:
+        app: todo-v2
+    spec:
+      containers:
+        - name: todo-app
+          image: praneeth2006racham/todo-app:v2
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-v2-service
+spec:
+  selector:
+    app: todo-v2
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP
